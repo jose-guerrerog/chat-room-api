@@ -7,5 +7,5 @@ services:
     # preDeployCommand: "bundle exec rails db:migrate" # preDeployCommand only available on paid instance types
     startCommand: "bundle exec rails server"
     envVars:
-      - key: a2538c632b21e83889e6543c5d146ba1
+      - key: RAILS_MASTER_KEY
         sync: false
