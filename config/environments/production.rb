@@ -79,6 +79,12 @@ Rails.application.configure do
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
 
+  config.action_cable.mount_path = '/cable'
+  config.action_cable.url = ENV['RAILS_APP_URL']  + '/cable'
+  config.action_cable.allowed_request_origins = [
+    ENV['REACT_APP_URL']
+  ]
+  
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
   #   "example.com",     # Allow requests from example.com
