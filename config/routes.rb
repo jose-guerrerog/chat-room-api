@@ -3,6 +3,8 @@ Rails.application.routes.draw do
 
   get '/health', to: proc { [200, {}, ['ok']] }
 
+  get '/debug/routes', to: 'debug#routes'
+  
   resources :rooms, only: [:index, :create, :show] do
     resources :messages, only: [:create, :index]
   end
