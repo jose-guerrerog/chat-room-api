@@ -28,12 +28,14 @@ class RoomChannel < ApplicationCable::Channel
       
       puts "Created message: #{message.inspect}"
       
-      # Add this line to broadcast the message to all subscribers
-      ActionCable.server.broadcast("room_#{params[:room_id]}", message.as_json)
+      # Replace this line
+      # ActionCable.server.broadcast("room_#{params[:room_id]}", message.as_json)
+      
+      # With this line - it matches your stream_for subscription
+      RoomChannel.broadcast_to(room, message.as_json)
       
     rescue => e
       puts "Error in speak method: #{e.message}"
       puts e.backtrace.join("\n")
     end
-  end
 end
