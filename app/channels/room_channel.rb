@@ -2,14 +2,14 @@ class RoomChannel < ApplicationCable::Channel
   def subscribed
     room_id = params[:room_id]
     puts "Client subscribed to RoomChannel for room ID: #{room_id}"
-    begin
-      room = Room.find(room_id)
-      stream_for room
-      puts "Successfully subscribed to room: #{room.name}"
-    rescue => e
-      puts "Error subscribing to room: #{e.message}"
-      reject
-    end
+    
+    # Use a simple string-based stream instead of stream_for
+    stream_from "room_#{room_id}"
+    puts "Successfully subscribed to room channel: #{room_id}"
+    
+  rescue => e
+    puts "Error subscribing to room: #{e.message}"
+    reject
   end
 
   def unsubscribed
@@ -20,42 +20,31 @@ class RoomChannel < ApplicationCable::Channel
     puts "Received speak action with data: #{data.inspect}"
     begin
       room_id = params[:room_id]
-      room = Room.find_by(id: room_id)
       
-      if room.nil?
-        puts "Room not found with ID: #{room_id}"
-        return
-      end
-      
-      message = room.messages.create!(
+      # Skip finding the room by ID for broadcasting purposes
+      # Instead, just create the message using the room_id directly
+      message = Message.create!(
         content: data['content'],
-        sender_name: data['sender_name']
+        sender_name: data['sender_name'],
+        room_id: room_id
       )
       
       puts "Created message: #{message.inspect}"
       
-      # Create a simple serialized message hash to avoid complex object serialization issues
+      # Create a simple message hash
       message_data = {
         id: message.id,
         content: message.content,
         sender_name: message.sender_name,
         created_at: message.created_at,
-        room_id: room.id
+        room_id: room_id
       }
       
-      # Use broadcast_to with proper error handling
-      begin
-        puts "Attempting to broadcast message to room: #{room.id}"
-        RoomChannel.broadcast_to(room, message_data)
-        puts "Successfully broadcast message"
-      rescue => broadcast_error
-        puts "Error during broadcast: #{broadcast_error.message}"
-        puts broadcast_error.backtrace.join("\n")
-        
-        # Fallback to direct broadcasting if the broadcast_to method fails
-        puts "Trying fallback broadcast method"
-        ActionCable.server.broadcast("room_channel_#{room_id}", message_data)
-      end
+      # Use a simple string identifier that doesn't depend on finding the room
+      channel_name = "room_#{room_id}"
+      puts "Broadcasting directly to channel: #{channel_name}"
+      ActionCable.server.broadcast(channel_name, message_data)
+      puts "Broadcast attempt completed"
       
     rescue => e
       puts "Error in speak method: #{e.message}"
