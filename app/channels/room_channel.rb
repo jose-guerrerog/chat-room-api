@@ -38,4 +38,5 @@ class RoomChannel < ApplicationCable::Channel
       puts "Error in speak method: #{e.message}"
       puts e.backtrace.join("\n")
     end
+  end
 end
